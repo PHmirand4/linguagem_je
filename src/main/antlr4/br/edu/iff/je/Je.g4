@@ -1,525 +1,116 @@
 grammar Je;
 
-PROGRAMA
-    : 'põgãma'
-    ;
-
-DELIM_LINHA
-    : ';'
-    ;
-
-DEC_VAR
-    : 'vãso'
-    ;
-
-PROCEDIMENTO
-    : 'posedimẽto'
-    ;
-
-EH
-    : 'vẽ'
-    ;
-
-SEPARADOR
-    : ','
-    ;
-
-DELIM_CAMPO
-    : '.'
-    ;
-
-INICIO
-    : 'pẽ_jẽg'
-    ;
-
-FIM
-    : 'kar'
-    ;
-
-ESCREVER
-    : 'ven'
-    ;
-
-LER
-    : 'to_ke'
-    ;
-
-DENTRO_DE
-    : 'kã'
-    ;
-
-GUARDAR
-    : 'rãg'
-    ;
-
-DELIM_INTERVALO
-    : '->'
-    ;
-
-CONTAR
-    : 'nĩkrén'
-    ;
-
-RETORNAR
-    : 'kyrã'
-    ;
-
-FUNCAO
-    : 'fũsã'
-    ;
-
-ENQUANTO
-    : 'myr'
-    ;
-
-SENAO
-    : 'jo'
-    ;
-
-VERDADEIRO
-    : 'pẽ'
-    ;
-
-FALSO
-    : 'pẽ_vó'
-    ;
-
-ENTAO
-    : 'ge'
-    ;
-
-ISTO
-    : 'tag'
-    ;
-
-IR
-    : 'mũ'
-    ;
-
-REPETIR
-    : 'mãn'
-    ;
-
-FAZER
-    : 'han'
-    ;
-
-PARA
-    : 'jé'
-    ;
-
-CONTRARIO
-    : 'jãvo'
-    ;
-
-INTERROMPER
-    : 'gáv'
-    ;
-
-E_LOGICO
-    : '&&'
-    ;
-
-OU_LOGICO
-    : '||'
-    ;
-
-NAO
-    : 'tũ'
-    ;
-
-EM_FRENTE
-    : 'jy'
-    ;
-
-INTEIRO
-    : 'ĩtelo'
-    ;
-
-REAL
-    : 'reau'
-    ;
-
-TEXTO
-    : 'tesetu'
-    ;
-
-DIGITO
-    : 'djisitu'
-    ;
-
-LOGICO
-    : 'lósiko'
-    ;
-
-A_PAR
-    : '('
-    ;
-
-F_PAR
-    : ')'
-    ;
-
-A_COLC
-    : '['
-    ;
-
-F_COLC
-    : ']'
-    ;
+// Regra inicial do parser
+programa: PROGRAMA IDENTIFICADOR DELIM_LINHA dec_variaveis? corpo_programa;
 
-MULT
-    : '*'
+dec_variaveis: DEC_VAR declaracao+;
+declaracao:
+      tipo IDENTIFICADOR EH DELIM_LINHA
+    | tipo A_COLC expressao F_COLC DENTRO_DE IDENTIFICADOR GUARDAR DELIM_LINHA
     ;
 
-DIV
-    : '/'
-    ;
-SOMA
-    : '+'
-    ;
-
-SUB
-    : '-'
-    ;
-
-IGUAL
-    : '=='
-    ;
-
-DIFERENTE
-    : '<>'
-    ;
-
-MAIOR
-    : '>'
-    ;
-MENOR
-    : '<'
-    ;
-
-MAIORIGUAL
-    : '>='
-    ;
-
-MENORIGUAL
-    : '<='
-    ;
-
-fragment LETRA 
-    : [a-z]
-    | [A-Z]
-    | 'á' | 'ã' | 'Á' | 'Ã'
-    | 'é' | 'ẽ' | 'É' | 'Ẽ'
-    | 'ĩ' | 'Ĩ'
-    | 'ó' | 'Ó'
-    | 'ũ' | 'Ũ'
-    | 'ỹ' | 'Ỹ'
-    | 'nh' | 'NH'
-    | '_'
-    ;
-
-fragment NUMERO 
-    : [0-9]
-    ;
-
-fragment ESCAPE
-    : '\\' [btnr"\\]
-    ;
-
-CARACTERE
-    : '\'' ( ESCAPE | ~['\\\r\n] ) '\''
-    ;
-
-CADEIA_CARACT
-    : '"' (ESCAPE | ~["\\\r\n])* '"'
-    ;
-
-NUMERAL_REAL: NUMERO+ '.' NUMERO+;
-
-NUMERAL_INT: NUMERO+;
-
-ESPACO: (' ' | '\t' | '\r' | '\n') -> skip;
-
-IDENTIFICADOR: LETRA(LETRA | NUMERO)*;
-
-programa
-    : PROGRAMA IDENTIFICADOR DELIM_LINHA
-      DEC_VAR lista_dec_variaveis
-      lista_dec_modulos
-    ;
-
-lista_dec_variaveis
-    : (dec_variavel)*
-    ;
-    
-
-dec_variavel
-    : tipo IDENTIFICADOR EH DELIM_LINHA
-    ;
-
-tipo
-    : tipo_primitivo
-    | tipo_vetor
-    | tipo_matriz
-    | IDENTIFICADOR
-    ;
-
-tipo_primitivo
-    : INTEIRO
-    | REAL
-    | TEXTO
-    | DIGITO
-    | LOGICO
-    ;
-
-tipo_vetor
-    : tipo_primitivo A_COLC NUMERAL_INT F_COLC
-    ;
-
-tipo_matriz
-    : tipo_primitivo A_COLC NUMERAL_INT SEPARADOR NUMERAL_INT F_COLC
-    ;
-
-tipo_registro
-    : ISTO IDENTIFICADOR EH lista_campos FIM
-    ;
-
-lista_campos
-    : (dec_variavel)+ DELIM_LINHA
-    ;
-
-lista_dec_modulos
-    : (modulo)*
-    ;
-
-modulo
-    : procedimento
-    ;
-
-procedimento 
-    : IDENTIFICADOR PROCEDIMENTO EH A_PAR lista_parametros F_PAR DELIM_LINHA
-      DEC_VAR lista_dec_variaveis
-      INICIO 
-      lista_comandos
-      FIM
-    ;
-
-funcao
-    : IDENTIFICADOR tipo FUNCAO EH A_PAR lista_parametros F_PAR DELIM_LINHA
-      DEC_VAR lista_dec_variaveis
-      INICIO 
-      lista_comandos  
-      FIM
-    ;
-
-lista_parametros
-    : (parametro (SEPARADOR lista_parametros)*)?
-    ;
-
-parametro
-    : tipo IDENTIFICADOR EH
-    ;
-
-lista_comandos
-    : (comando)*
-    ;
-
-comando
-    : comando_escrever
-    | comando_ler
-    | comando_atribuir
-    | comando_retornar
-    | comando_chamada_modulo
-    | comando_repeticao_ir 
-    | comando_repeticao_enquanto
-    | comando_repeticao_repetir
-    | comando_condicional_se
-    | comando_condicional_escolher
-    | comando_em_frente
-    | comando_interromper
-    ;
+tipo: TIPO_INTEIRO | TIPO_TEXTO | TIPO_REAL;
 
-comando_em_frente
-    : EM_FRENTE DELIM_LINHA
-    ;
-
-comando_interromper
-    : INTERROMPER DELIM_LINHA
-    ;
-
-comando_condicional_escolher
-    : DENTRO_DE A_PAR IDENTIFICADOR F_PAR
-        lista_casos
-      FIM
-    ;
-
-lista_casos
-    : (caso)+
-      (caso_padrao)?
-    ;
-
-caso
-    : valor_caso EH lista_comandos FIM
-    ;
-
-caso_padrao
-    : CONTRARIO lista_comandos FIM
-    ;
-    
-
-valor_caso
-    : NUMERAL_INT
-    | CARACTERE
-    | intervalo_caso
-    ;
+corpo_programa: INICIO comando+ FIM;
 
-intervalo_caso
-    : NUMERAL_INT DELIM_INTERVALO NUMERAL_INT
+comando:
+      cmd_atribuicao
+    | cmd_escrever
+    | cmd_ler
+    | cmd_loop
+    | cmd_condicional
+    | cmd_retorno
+    | cmd_chamada_func
     ;
 
-comando_condicional_se
-    : ENTAO A_PAR expressao_relacional F_PAR FAZER
-        lista_comandos
-      FIM
-    | ENTAO A_PAR expressao_relacional F_PAR FAZER
-        lista_comandos
-      SENAO
-        lista_comandos
-      FIM
-    ;
+cmd_atribuicao: expressao DENTRO_DE variavel GUARDAR DELIM_LINHA;
+variavel: IDENTIFICADOR | IDENTIFICADOR A_COLC expressao F_COLC;
 
-comando_repeticao_repetir
-    : ISTO
-        lista_comandos
-      FAZER ENQUANTO A_PAR expressao_relacional F_PAR 
-    ;
+cmd_escrever: expressao ESCREVER DELIM_LINHA;
+cmd_ler: variavel LER DELIM_LINHA;
 
-comando_repeticao_enquanto
-    : ENQUANTO A_PAR expressao_relacional F_PAR
-        lista_comandos
-      REPETIR
-    ;
+cmd_loop: expressao DELIM_INTERVALO expressao DENTRO_DE IDENTIFICADOR SEPARADOR expressao CONTAR DELIM_LINHA comando+ CONTAR FIM;
 
-comando_repeticao_ir
-    : A_PAR 
-        NUMERAL_INT DELIM_INTERVALO NUMERAL_INT DELIM_LINHA
-        DENTRO_DE IDENTIFICADOR GUARDAR DELIM_LINHA
-        NUMERAL_INT CONTAR
-      F_PAR IR
-         lista_comandos
-      FIM
-    ;
+cmd_condicional: expressao_relacional CONDICIONAL ENTAO comando+ (SENAO comando+)? FIM;
 
-intervalo
-    : expressao_aritmetica DELIM_INTERVALO expressao_aritmetica
-    ;
-    
+cmd_retorno: KYRA expressao? DELIM_LINHA;
 
-comando_chamada_modulo
-    : chamada DELIM_LINHA
-    ;
+cmd_chamada_func: IDENTIFICADOR A_PAR (expressao (SEPARADOR expressao)*)? F_PAR DELIM_LINHA;
 
-comando_escrever
-    : expressao ESCREVER DELIM_LINHA
-    ;
 
-comando_ler
-    : IDENTIFICADOR LER DELIM_LINHA
-    ;
+expressao: expressao_aritmetica;
 
-comando_atribuir
-    : expressao DENTRO_DE IDENTIFICADOR GUARDAR DELIM_LINHA
-    | expressao DENTRO_DE campo_registro GUARDAR DELIM_LINHA
-    | expressao DENTRO_DE acesso_vetor GUARDAR DELIM_LINHA
+expressao_aritmetica:
+      termo_aritmetico ( (SOMA | SUB) termo_aritmetico)*
     ;
 
-campo_registro
-    : (IDENTIFICADOR DELIM_CAMPO IDENTIFICADOR ( DELIM_CAMPO campo_registro)*)
+termo_aritmetico:
+      fator_aritmetico ( (MULT | DIV) fator_aritmetico)*
     ;
-    
-    
-comando_retornar
-    : RETORNAR DELIM_LINHA
-    | expressao RETORNAR DELIM_LINHA;
 
-expressao
-    : CADEIA_CARACT
+fator_aritmetico:
+      variavel
     | NUMERAL_INT
-    | NUMERAL_REAL
-    | VERDADEIRO
-    | FALSO
-    | CARACTERE
-    | chamada
-    | expressao_aritmetica
-    | expressao_relacional
-    | expressao_criar_vetor
-    | IDENTIFICADOR
-    | campo_registro
+    | CADEIA_CARACT
+    | A_PAR expressao F_PAR
     ;
 
-expressao_aritmetica
-    : expressao_aritmetica SOMA termo_aritmetico 
-    | expressao_aritmetica SUB termo_aritmetico 
-    | termo_aritmetico;
-
-termo_aritmetico
-    : termo_aritmetico MULT fator_aritmetico 
-    | termo_aritmetico DIV fator_aritmetico 
-    | fator_aritmetico;
-
-fator_aritmetico
-    : NUMERAL_INT 
-    | NUMERAL_REAL 
-    | IDENTIFICADOR
-    | campo_registro
-    | chamada 
-    | A_PAR expressao_aritmetica F_PAR
+expressao_relacional:
+    expressao_aritmetica ( (IGUAL | MAIOR | MENOR | MAIOR_IGUAL | MENOR_IGUAL | DIFERENTE) expressao_aritmetica)+
     ;
 
-expressao_criar_vetor : tipo_primitivo A_COLC expressao_aritmetica F_COLC;
+// LEXER
 
-acesso_vetor : IDENTIFICADOR A_COLC expressao_aritmetica F_COLC;
+// Palavras-chave
+PROGRAMA: 'põgãma';
+DEC_VAR: 'vãso' | 'vāso';
+INICIO: 'pën_jēg';
+FIM: 'kar';
+EH: 'vẽ';
+GUARDAR: 'rãg' | 'råg';
+ESCREVER: 'ven';
+LER: 'to_ke';
+DENTRO_DE: 'kã';
+DELIM_INTERVALO: '->';
+CONTAR: 'nīkrén';
+KYRA: 'kyrã';
+FUNCAO: 'fũsã';
+PROCEDIMENTO: 'põsedimēto';
+ENQUANTO: 'myr';
+CONDICIONAL: 'nỹtĩ' | 'nī';
+ENTAO: 'ge';
+SENAO: 'jo';
+TIPO_INTEIRO: 'ītēlo' | 'ĩtêlo';
+TIPO_TEXTO: 'tesetu';
+TIPO_REAL: 'Hêã';
+VERDADEIRO: 'pẽ';
+FALSO: 'pẽ_vó';
 
-expressao_relacional
-    : expressao_relacional operador_booleano termo_relacional 
-    | termo_relacional;
 
-operador_booleano
-    : E_LOGICO 
-    | OU_LOGICO
-    ; 
+// Operadores e Delimitadores
+E_LOGICO: '&&';
+OU_LOGICO: '||';
+IGUAL: '==' | '=';
+MAIOR: '>';
+MENOR: '<';
+MAIOR_IGUAL: '>=';
+MENOR_IGUAL: '<=';
+DIFERENTE: '<>';
+MULT: '*';
+DIV: '/';
+SOMA: '+';
+SUB: '-';
+A_PAR: '(';
+F_PAR: ')';
+A_COLC: '[';
+F_COLC: ']';
+DELIM_LINHA: ';';
+SEPARADOR: ',';
 
-termo_relacional: 
-    expressao_aritmetica operador_relacional expressao_aritmetica |
-    fator_relacional;
+// Tokens Gerais
+IDENTIFICADOR: [a-zA-Z_] [a-zA-Z0-9_]*;
+NUMERAL_INT: [0-9]+;
+CADEIA_CARACT: '"' ( ~["] | '""' )* '"';
 
-fator_relacional
-    : VERDADEIRO 
-    | FALSO 
-    | IDENTIFICADOR 
-    | campo_registro
-    | chamada
-    |  A_PAR expressao_relacional F_PAR;
-
-operador_relacional
-    : IGUAL 
-    | MAIOR 
-    | MAIORIGUAL 
-    | MENOR 
-    | MENORIGUAL 
-    | DIFERENTE
-    ;
-
-chamada
-    : IDENTIFICADOR A_PAR lista_argumentos F_PAR
-    ;
-
-lista_argumentos
-    : (argumento)*
-    ;
-
-argumento
-    : expressao
-    ;
-
+// Ignorar espaços em branco
+ESPACO: [ \t\r\n]+ -> skip;
